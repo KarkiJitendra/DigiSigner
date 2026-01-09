@@ -1,0 +1,148 @@
+{% extends "base.html" %}
+
+{% block title %}DigSigner - Secure Digital Signature Platform{% endblock %}
+
+{% block meta_description %}
+    DigSigner provides secure, legally-binding digital signatures for businesses and individuals. 
+    Sign PDFs, Word documents, and contracts online with ease.
+{% endblock %}
+
+{% block meta_keywords %}
+    digital signature, e-signature, sign PDF online, electronic signature, document signing, 
+    legal signatures, online contracts, business documents
+{% endblock %}
+{% load static %}
+
+{% block extra_css %}
+    <style>
+        /* Home page specific styles */
+        .hero {
+            background: linear-gradient(135deg, #f5f9ff 0%, #e8f4ff 100%);
+            padding: 80px 0;
+            text-align: center;
+            border-radius: 20px;
+            margin-bottom: 60px;
+        }
+        
+        .hero h1 {
+            font-size: 48px;
+            color: #1e3c72;
+            margin-bottom: 20px;
+        }
+        
+        .hero p {
+            font-size: 20px;
+            color: #666;
+            max-width: 600px;
+            margin: 0 auto 30px;
+        }
+        
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            margin: 40px 0;
+        }
+        
+        .feature-card {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
+            text-align: center;
+            transition: transform 0.3s;
+        }
+        
+        .feature-card:hover {
+            transform: translateY(-10px);
+        }
+        
+        .feature-icon {
+            font-size: 40px;
+            color: #4dabf7;
+            margin-bottom: 20px;
+        }
+    </style>
+{% endblock %}
+
+{% block content %}
+    <!-- Hero Section -->
+    <section class="hero">
+        <h1>Secure Digital Signature Platform</h1>
+        <p>Sign documents online with legally-binding electronic signatures. Fast, secure, and trusted by thousands of businesses worldwide.</p>
+        <a href="{% url 'register' %}" class="btn-primary" style="padding: 15px 30px; font-size: 18px;">
+            <i class="fas fa-play-circle"></i> Get Started Free
+        </a>
+    </section>
+
+    <!-- Features Section -->
+    <section class="features">
+        <h2 style="text-align: center; margin-bottom: 40px; color: #1e3c72;">Why Choose SignDigi?</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <h3>Bank-Level Security</h3>
+                <p>AES-256 encryption, audit trails, and compliance with global regulations including eIDAS, GDPR, and ESIGN.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-bolt"></i>
+                </div>
+                <h3>Lightning Fast</h3>
+                <p>Sign documents in under 60 seconds. No downloads or software installation required.</p>
+            </div>
+            
+            <div class="feature-card">
+                <div class="feature-icon">
+                    <i class="fas fa-globe"></i>
+                </div>
+                <h3>Globally Accepted</h3>
+                <p>Legally binding in over 180 countries. Court-admissible with complete audit trail.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section style="text-align: center; margin-top: 60px; padding: 40px; background: linear-gradient(135deg, #1e3c72, #2a5298); border-radius: 20px; color: white;">
+        <h2 style="margin-bottom: 20px;">Ready to Go Digital?</h2>
+        <p style="margin-bottom: 30px; font-size: 18px;">Join 50,000+ businesses using DigSigner for their document signing needs.</p>
+        <div style="display: flex; gap: 20px; justify-content: center;">
+            <a href="{% url 'register' %}" class="btn-primary" style="background: white; color: #1e3c72;">
+                Start Free Trial
+            </a>
+            <a href="#" class="btn-outline" style="border-color: white; color: white;">
+                Contact Sales
+            </a>
+        </div>
+    </section>
+{% endblock %}
+
+{% block extra_js %}
+    <script>
+        // Home page specific JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('Home page loaded');
+            
+            // Animate feature cards on scroll
+            const featureCards = document.querySelectorAll('.feature-card');
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            featureCards.forEach(card => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(20px)';
+                card.style.transition = 'all 0.5s ease';
+                observer.observe(card);
+            });
+        });
+    </script>
+{% endblock %}
