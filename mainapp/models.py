@@ -22,3 +22,8 @@ class Users(TimeStampedModel):
     def __str__(self):
         return self.email
     
+
+class Signature(TimeStampedModel):
+    user = models.ForeignKey(Users, on_delete=models.CASCADE)
+    
+    

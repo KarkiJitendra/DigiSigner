@@ -1,148 +1,296 @@
 {% extends "base.html" %}
 
-{% block title %}DigSigner - Secure Digital Signature Platform{% endblock %}
+{% block title %}Dashboard - Digital Signature Management{% endblock %}
 
 {% block meta_description %}
-    DigSigner provides secure, legally-binding digital signatures for businesses and individuals. 
-    Sign PDFs, Word documents, and contracts online with ease.
+    Manage your digital signatures, sign documents online, and track your signing workflow.
 {% endblock %}
 
 {% block meta_keywords %}
-    digital signature, e-signature, sign PDF online, electronic signature, document signing, 
-    legal signatures, online contracts, business documents
+    dashboard, digital signature, document management, sign documents, track signatures
 {% endblock %}
-{% load static %}
-
+{%load static%}
 {% block extra_css %}
-    <style>
-        /* Home page specific styles */
-        .hero {
-            background: linear-gradient(135deg, #f5f9ff 0%, #e8f4ff 100%);
-            padding: 80px 0;
-            text-align: center;
-            border-radius: 20px;
-            margin-bottom: 60px;
-        }
-        
-        .hero h1 {
-            font-size: 48px;
-            color: #1e3c72;
-            margin-bottom: 20px;
-        }
-        
-        .hero p {
-            font-size: 20px;
-            color: #666;
-            max-width: 600px;
-            margin: 0 auto 30px;
-        }
-        
-        .features-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            margin: 40px 0;
-        }
-        
-        .feature-card {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.05);
-            text-align: center;
-            transition: transform 0.3s;
-        }
-        
-        .feature-card:hover {
-            transform: translateY(-10px);
-        }
-        
-        .feature-icon {
-            font-size: 40px;
-            color: #4dabf7;
-            margin-bottom: 20px;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static 'css/dashboard.css' %}">
 {% endblock %}
 
 {% block content %}
-    <!-- Hero Section -->
-    <section class="hero">
-        <h1>Secure Digital Signature Platform</h1>
-        <p>Sign documents online with legally-binding electronic signatures. Fast, secure, and trusted by thousands of businesses worldwide.</p>
-        <a href="{% url 'register' %}" class="btn-primary" style="padding: 15px 30px; font-size: 18px;">
-            <i class="fas fa-play-circle"></i> Get Started Free
-        </a>
-    </section>
+<div class="dashboard-container">
+    <!-- Dashboard Header -->
+    <div class="dashboard-header">
+        <h1>Digital Signature Online Service</h1>
+        <p>Sign Documents Online Securely and Efficiently</p>
+    </div>
 
-    <!-- Features Section -->
-    <section class="features">
-        <h2 style="text-align: center; margin-bottom: 40px; color: #1e3c72;">Why Choose SignDigi?</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <h3>Bank-Level Security</h3>
-                <p>AES-256 encryption, audit trails, and compliance with global regulations including eIDAS, GDPR, and ESIGN.</p>
+    <!-- Welcome Card -->
+    <div class="welcome-card">
+        <div class="welcome-content">
+            <h2>Welcome back, {% if user.get_full_name %}{{ user.get_full_name }}{% else %}{{ user.username }}{% endif %}! 👋</h2>
+            <p>You have <strong>3 free documents</strong> remaining this month. <span class="current-date"></span></p>
+        </div>
+        <div class="usage-stats">
+            <div class="stat-item">
+                <span class="stat-number">{{ user_stats.documents|default:"1,247" }}</span>
+                <span class="stat-label">Total Documents</span>
             </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-bolt"></i>
-                </div>
-                <h3>Lightning Fast</h3>
-                <p>Sign documents in under 60 seconds. No downloads or software installation required.</p>
+            <div class="stat-item">
+                <span class="stat-number">{{ user_stats.signed|default:"892" }}</span>
+                <span class="stat-label">Signed</span>
             </div>
-            
-            <div class="feature-card">
-                <div class="feature-icon">
-                    <i class="fas fa-globe"></i>
-                </div>
-                <h3>Globally Accepted</h3>
-                <p>Legally binding in over 180 countries. Court-admissible with complete audit trail.</p>
+            <div class="stat-item">
+                <span class="stat-number">{{ user_stats.pending|default:"128" }}</span>
+                <span class="stat-label">Pending</span>
             </div>
         </div>
-    </section>
+    </div>
 
-    <!-- CTA Section -->
-    <section style="text-align: center; margin-top: 60px; padding: 40px; background: linear-gradient(135deg, #1e3c72, #2a5298); border-radius: 20px; color: white;">
-        <h2 style="margin-bottom: 20px;">Ready to Go Digital?</h2>
-        <p style="margin-bottom: 30px; font-size: 18px;">Join 50,000+ businesses using DigSigner for their document signing needs.</p>
-        <div style="display: flex; gap: 20px; justify-content: center;">
-            <a href="{% url 'register' %}" class="btn-primary" style="background: white; color: #1e3c72;">
-                Start Free Trial
+    <!-- Quick Stats -->
+    <div class="quick-stats">
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-file-contract"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-documents">1,247</h3>
+                <p>Total Documents</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-signed">892</h3>
+                <p>Signed Documents</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-pending">128</h3>
+                <p>Pending Signatures</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon">
+                <i class="fas fa-layer-group"></i>
+            </div>
+            <div class="stat-content">
+                <h3 class="stat-templates">45</h3>
+                <p>Saved Templates</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Signing Cards Grid -->
+    <div class="signing-cards">
+        <!-- Sign Document Now Card -->
+        <div class="signing-card">
+            <div class="signing-card-header">
+                <h3>SIGN DOCUMENT NOW</h3>
+                <p>100% free & secure unlimited documents</p>
+            </div>
+            
+            <div class="file-formats">
+                <span class="format-badge">PDF</span>
+                <span class="format-badge">DOC</span>
+                <span class="format-badge">XLS</span>
+                <span class="format-badge">JPG</span>
+            </div>
+            
+            <div class="upload-area" id="sign-now-upload">
+                <div class="upload-icon">
+                    <i class="fas fa-cloud-upload-alt"></i>
+                </div>
+                <div class="upload-text">Drop your file or choose file</div>
+                <div class="upload-subtext">PDF | DOC | XLS | JPG</div>
+                <input type="file" class="file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+            </div>
+            
+            <div class="uploaded-files">
+                <!-- Files will appear here -->
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn-sign" onclick="handleSignNow()">
+                    <i class="fas fa-signature"></i> SIGN DOCUMENT NOW
+                </button>
+            </div>
+        </div>
+
+        <!-- Send for Signing Card -->
+        <div class="signing-card">
+            <div class="signing-card-header">
+                <h3>SEND FOR SIGNING</h3>
+                <p>Full 14-day trial then 3 free docs per month</p>
+            </div>
+            
+            <div class="file-formats">
+                <span class="format-badge">PDF</span>
+                <span class="format-badge">DOC</span>
+                <span class="format-badge">XLS</span>
+                <span class="format-badge">JPG</span>
+            </div>
+            
+            <div class="upload-area" id="send-signing-upload">
+                <div class="upload-icon">
+                    <i class="fas fa-paper-plane"></i>
+                </div>
+                <div class="upload-text">Drop your file or choose file</div>
+                <div class="upload-subtext">PDF | DOC | XLS | JPG</div>
+                <input type="file" class="file-input" multiple accept=".pdf,.doc,.docx,.xls,.xlsx,.jpg,.jpeg,.png">
+            </div>
+            
+            <div class="uploaded-files">
+                <!-- Files will appear here -->
+            </div>
+            
+            <div class="action-buttons">
+                <button class="btn-sign-outline" onclick="handleSendForSigning()">
+                    <i class="fas fa-share-square"></i> SEND FOR SIGNING
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Documents -->
+    <div class="recent-documents">
+        <div class="section-header">
+            <h2>Recent Documents</h2>
+            <a href="#" class="view-all">View All →</a>
+        </div>
+        
+        <div class="table-responsive">
+            <table class="documents-table">
+                <thead>
+                    <tr>
+                        <th>Document Name</th>
+                        <th>Type</th>
+                        <th>Created</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="document-name">
+                                <i class="fas fa-file-pdf document-icon"></i>
+                                <span>Non-Disclosure Agreement.pdf</span>
+                            </div>
+                        </td>
+                        <td>PDF</td>
+                        <td>2 hours ago</td>
+                        <td><span class="status-badge" data-status="signed">Signed</span></td>
+                        <td>
+                            <div class="action-dropdown">
+                                <button class="dropdown-btn"><i class="fas fa-ellipsis-v"></i></button>
+                                <div class="dropdown-content">
+                                    <a href="#" class="dropdown-item"><i class="fas fa-eye"></i> View</a>
+                                    <a href="#" class="dropdown-item"><i class="fas fa-download"></i> Download</a>
+                                    <a href="#" class="dropdown-item"><i class="fas fa-share"></i> Share</a>
+                                    <a href="#" class="dropdown-item"><i class="fas fa-trash"></i> Delete</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="document-name">
+                                <i class="fas fa-file-word document-icon"></i>
+                                <span>Employment Contract.docx</span>
+                            </div>
+                        </td>
+                        <td>DOCX</td>
+                        <td>Yesterday</td>
+                        <td><span class="status-badge" data-status="pending">Pending</span></td>
+                        <td>
+                            <div class="action-dropdown">
+                                <button class="dropdown-btn"><i class="fas fa-ellipsis-v"></i></button>
+                                <div class="dropdown-content">
+                                    <a href="#" class="dropdown-item"><i class="fas fa-pen"></i> Sign Now</a>
+                                    <a href="#" class="dropdown-item"><i class="fas fa-eye"></i> View</a>
+                                    <a href="#" class="dropdown-item"><i class="fas fa-share"></i> Resend</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="document-name">
+                                <i class="fas fa-file-excel document-icon"></i>
+                                <span>Financial Report.xlsx</span>
+                            </div>
+                        </td>
+                        <td>XLSX</td>
+                        <td>3 days ago</td>
+                        <td><span class="status-badge" data-status="signed">Signed</span></td>
+                        <td>
+                            <div class="action-dropdown">
+                                <button class="dropdown-btn"><i class="fas fa-ellipsis-v"></i></button>
+                                <div class="dropdown-content">
+                                    <a href="#" class="dropdown-item"><i class="fas fa-eye"></i> View</a>
+                                    <a href="#" class="dropdown-item"><i class="fas fa-download"></i> Download</a>
+                                    <a href="#" class="dropdown-item"><i class="fas fa-chart-bar"></i> Analytics</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>
+                            <div class="document-name">
+                                <i class="fas fa-file-pdf document-icon"></i>
+                                <span>Service Agreement.pdf</span>
+                            </div>
+                        </td>
+                        <td>PDF</td>
+                        <td>1 week ago</td>
+                        <td><span class="status-badge" data-status="expired">Expired</span></td>
+                        <td>
+                            <div class="action-dropdown">
+                                <button class="dropdown-btn"><i class="fas fa-ellipsis-v"></i></button>
+                                <div class="dropdown-content">
+                                    <a href="#" class="dropdown-item"><i class="fas fa-redo"></i> Renew</a>
+                                    <a href="#" class="dropdown-item"><i class="fas fa-eye"></i> View</a>
+                                    <a href="#" class="dropdown-item"><i class="fas fa-trash"></i> Delete</a>
+                                </div>
+                            </div>
+                        </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- Quick Links -->
+    <div class="recent-documents">
+        <div class="section-header">
+            <h2>Quick Links</h2>
+        </div>
+        <div style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px;">
+            <a href="#" class="btn-sign-outline" style="flex-direction: column; padding: 20px; text-align: center;">
+                <i class="fas fa-layer-group" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <span>Templates</span>
             </a>
-            <a href="#" class="btn-outline" style="border-color: white; color: white;">
-                Contact Sales
+            <a href="#" class="btn-sign-outline" style="flex-direction: column; padding: 20px; text-align: center;">
+                <i class="fas fa-address-book" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <span>Contacts</span>
+            </a>
+            <a href="#" class="btn-sign-outline" style="flex-direction: column; padding: 20px; text-align: center;">
+                <i class="fas fa-chart-line" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <span>Reports</span>
+            </a>
+            <a href="#" class="btn-sign-outline" style="flex-direction: column; padding: 20px; text-align: center;">
+                <i class="fas fa-cog" style="font-size: 24px; margin-bottom: 10px;"></i>
+                <span>Settings</span>
             </a>
         </div>
-    </section>
+    </div>
+</div>
 {% endblock %}
 
 {% block extra_js %}
-    <script>
-        // Home page specific JavaScript
-        document.addEventListener('DOMContentLoaded', function() {
-            console.log('Home page loaded');
-            
-            // Animate feature cards on scroll
-            const featureCards = document.querySelectorAll('.feature-card');
-            const observer = new IntersectionObserver((entries) => {
-                entries.forEach(entry => {
-                    if (entry.isIntersecting) {
-                        entry.target.style.opacity = '1';
-                        entry.target.style.transform = 'translateY(0)';
-                    }
-                });
-            }, { threshold: 0.1 });
-            
-            featureCards.forEach(card => {
-                card.style.opacity = '0';
-                card.style.transform = 'translateY(20px)';
-                card.style.transition = 'all 0.5s ease';
-                observer.observe(card);
-            });
-        });
-    </script>
+    <script src="{% static 'js/dashboard.js' %}"></script>
 {% endblock %}
