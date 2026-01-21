@@ -10,7 +10,6 @@ document.addEventListener('DOMContentLoaded', function() {
     const togglePasswordBtn = document.getElementById('toggle-password');
     const toggleAdminPasswordBtn = document.getElementById('toggle-admin-password');
     const personalForm = document.getElementById('personal-form');
-    const businessForm = document.getElementById('business-form');
     
     // Initialize form validation
     initFormValidation();
@@ -71,14 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
-    if (businessForm) {
-        businessForm.addEventListener('submit', function(e) {
-            if (!validateBusinessForm()) {
-                e.preventDefault();
-            }
-        });
-    }
-    
+
     // Initialize password strength for admin password
     const adminPasswordInput = document.getElementById('admin-password');
     const adminPasswordStrengthBar = document.getElementById('admin-password-strength-bar');
@@ -209,39 +201,7 @@ function validatePersonalForm() {
 /**
  * Validate business registration form
  */
-function validateBusinessForm() {
-    let isValid = true;
-    const emailInput = document.getElementById('business-email');
-    const passwordInput = document.getElementById('admin-password');
-    const termsCheckbox = document.getElementById('business-terms');
-    
-    // Clear previous error messages
-    clearErrorMessages();
-    
-    // Email validation
-    if (!isValidEmail(emailInput.value)) {
-        showError(emailInput, 'Please enter a valid business email address');
-        isValid = false;
-    }
-    
-    // Password validation
-    if (passwordInput && passwordInput.value.length < 8) {
-        showError(passwordInput, 'Password must be at least 8 characters long');
-        isValid = false;
-    }
-    
-    // Terms agreement
-    if (!termsCheckbox.checked) {
-        showError(termsCheckbox, 'You must agree to the business terms and conditions');
-        isValid = false;
-    }
-    
-    if (!isValid) {
-        showFormMessage('Please fix the errors in the form', 'error');
-    }
-    
-    return isValid;
-}
+
 
 /**
  * Check if email is valid
@@ -373,7 +333,6 @@ if (typeof module !== 'undefined' && module.exports) {
     module.exports = {
         isValidEmail,
         validatePersonalForm,
-        validateBusinessForm,
         updatePasswordStrength,
         togglePasswordVisibility
     };

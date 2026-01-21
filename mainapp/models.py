@@ -1,5 +1,5 @@
 from django.db import models
-
+from django.contrib.auth.models import AbstractUser
 
 class TimeStampedModel(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
@@ -9,7 +9,7 @@ class TimeStampedModel(models.Model):
         abstract = True
         
         
-class Users(TimeStampedModel):
+class Users(TimeStampedModel, AbstractUser):
     username = models.CharField(max_length=150, unique=True)
     email = models.EmailField(unique=True)
     first_name = models.CharField(max_length=30)

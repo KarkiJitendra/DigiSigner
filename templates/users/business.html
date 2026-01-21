@@ -1,0 +1,49 @@
+                <form id="business-form" class="form-content" method="POST" action="#">
+                    {% csrf_token %}
+                    <div class="input-group">
+                        <label for="business-name">Business Name *</label>
+                        <input type="text" id="business-name" name="business_name" placeholder="Enter your business name" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="business-email">Business Email *</label>
+                        <input type="email" id="business-email" name="business_email" placeholder="Enter business email address" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="business-type">Business Type</label>
+                        <select id="business-type" name="business_type">
+                            <option value="">Select business type</option>
+                            <option value="llc">LLC</option>
+                            <option value="corporation">Corporation</option>
+                            <option value="partnership">Partnership</option>
+                            <option value="sole-proprietor">Sole Proprietor</option>
+                            <option value="nonprofit">Nonprofit</option>
+                        </select>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="admin-name">Administrator Name *</label>
+                        <input type="text" id="admin-name" name="admin_name" placeholder="Enter administrator's full name" required>
+                    </div>
+                    
+                    <div class="input-group">
+                        <label for="admin-password">Administrator Password *</label>
+                        <input type="password" id="admin-password" name="admin_password" placeholder="Create a strong password" required>
+                        <span class="password-toggle" id="toggle-admin-password">
+                            <i class="far fa-eye"></i>
+                        </span>
+                        <div class="password-strength">
+                            <div class="password-strength-bar" id="admin-password-strength-bar"></div>
+                        </div>
+                    </div>
+                    
+                    <div class="terms">
+                        <input type="checkbox" id="business-terms" name="business_terms" required>
+                        <label for="business-terms">I agree to the <a href="#">Business Terms of Service</a>, <a href="#">Privacy Policy</a>, and authorize digital signatures on behalf of my business.</label>
+                    </div>
+                    
+                    <button type="submit" class="btn">
+                        <i class="fas fa-building"></i> Create Business Account
+                    </button>
+                </form>

@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'mainapp',
 ]
+AUTH_USER_MODEL = 'mainapp.Users'
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

@@ -1,34 +1,47 @@
 from django.shortcuts import render, redirect
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate, login, logout
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
+from .forms import *
 
-# Create your views here.
+
+
 def register(request):
-    return render(request, 'users/register.html')
+    # Initialize form variable outside the if/else or in both branches
+    if request.method == 'POST':
+        form = UserForm(request.POST)
+        if form.is_valid():
+            user=form.save(commit=False)
+            raw_password = form.cleaned_data.get('password')
+            user.set_password(raw_password)
+            form.save()
+            return redirect('login')
+    else:
+        # This handles the 'GET' request (initial page load)
+        form = UserForm()
+
+    # Now 'form' is guaranteed to exist whether it was a POST or GET
+    return render(request, 'users/register.html', {'form': form})
 
 def login_view(request):
     if request.user.is_authenticated:
         return redirect('dashboard')
     
     if request.method == 'POST':
+        # AuthenticationForm handles the authenticate() call internally
         form = AuthenticationForm(request, data=request.POST)
         if form.is_valid():
-            username = form.cleaned_data.get('username')
-            password = form.cleaned_data.get('password')
-            user = authenticate(username=username, password=password)
+            # Use the form's helper to get the authenticated user
+            user = form.get_user() 
             
-            if user is not None:
-                login(request, user)
-                messages.success(request, f'Welcome back, {user.get_full_name() or user.username}!')
-                
-                # Redirect to next parameter or dashboard
-                next_url = request.POST.get('next') or 'dashboard'
-                return redirect(next_url)
-            else:
-                messages.error(request, 'Invalid username or password.')
+            login(request, user)
+            messages.success(request, f'Welcome back!')
+            
+            return redirect('dashboard')
         else:
-            messages.error(request, 'Please correct the errors below.')
+            # If the form is invalid, Django usually attaches "invalid password" 
+            # errors to the form itself.
+            messages.error(request, 'Invalid email or password.')
     else:
         form = AuthenticationForm()
     
@@ -36,6 +49,16 @@ def login_view(request):
         'form': form,
         'next': request.GET.get('next', '')
     })
+
+def logout_view(request):
+    # This removes the user ID from the session and deletes the session cookie
+    logout(request)
     
+    # Add a success message to show on the login page
+    messages.info(request, "You have successfully logged out.")
+    
+    # Redirect to the login page or home page
+    return redirect('login')
+
 def dashboard(request):
     return render(request, 'users/dashboard.html')
