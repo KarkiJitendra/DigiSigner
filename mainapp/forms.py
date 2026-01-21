@@ -1,5 +1,5 @@
 from django import forms
-from .models import Users
+from .models import Users, Signature, Document
 
 class UserForm(forms.ModelForm):
     # Field not in model but needed for validation
@@ -23,3 +23,13 @@ class UserForm(forms.ModelForm):
         # Automatically add the 'input' or custom class to all fields
         for field in self.fields.values():
             field.widget.attrs.update({'class': 'my-input-class'}) # Optional
+
+class SignatureForm(forms.ModelForm):
+    class Meta:
+        model = Signature
+        fields = ['image']
+
+class DocumentForm(forms.ModelForm):
+    class Meta:
+        model = Document
+        fields = ['title', 'file']

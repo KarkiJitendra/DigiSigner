@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container" style="padding: 2rem;">
+    <h2>Upload Your Signature</h2>
+    <div class="card" style="padding: 2rem; margin-top: 1rem;">
+        <form method="post" enctype="multipart/form-data">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Upload Signature</button>
+        </form>
+    </div>
+</div>
+{% endblock %}
