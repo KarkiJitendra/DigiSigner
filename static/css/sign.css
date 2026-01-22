@@ -1,0 +1,27 @@
+.sign-container {
+    padding: 2rem;
+    display: block;
+}
+
+.sign-card {
+    padding: 2rem;
+    margin-top: 1rem;
+}
+
+.btn-sign {
+    background-color: #4CAF50;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    margin-right: 10px;
+}
+
+.btn-cancel {
+    background-color: #f44336;
+    color: white;
+    padding: 10px 20px;
+    text-decoration: none;
+    border-radius: 4px;
+}

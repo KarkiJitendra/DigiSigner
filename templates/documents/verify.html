@@ -1,18 +1,24 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/verify.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container" style="padding: 2rem;">
+<div class="container verify-container">
     <h2>Verify Document</h2>
-    <div class="card" style="padding: 2rem; margin-top: 1rem;">
+    <div class="card verify-card">
         <p>Upload a signed document to verify its authenticity.</p>
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <input type="file" name="file" required style="margin-bottom: 1rem; display: block;">
-            <button type="submit" class="btn btn-info" style="background-color: #2196F3; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Verify Document</button>
+            <input type="file" name="file" required class="file-input">
+            <button type="submit" class="btn btn-info btn-verify">Verify Document</button>
         </form>
     </div>
 
     {% if result %}
-    <div class="mt-4" style="margin-top: 2rem; padding: 1rem; border-radius: 4px; {% if result.valid %}background-color: #dff0d8; color: #3c763d;{% else %}background-color: #f2dede; color: #a94442;{% endif %}">
+    <div class="verification-result {% if result.valid %}result-valid{% else %}result-invalid{% endif %}">
         <h4>Verification Result</h4>
         <p>{{ result.message }}</p>
     </div>

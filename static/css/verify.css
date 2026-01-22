@@ -1,0 +1,40 @@
+.verify-container {
+    padding: 2rem;
+    /* Ensure it behaves as a block element to avoid layout issues if base.css .container is flex */
+    display: block;
+}
+
+.verify-card {
+    padding: 2rem;
+    margin-top: 1rem;
+}
+
+.file-input {
+    margin-bottom: 1rem;
+    display: block;
+}
+
+.btn-verify {
+    background-color: #2196F3;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+
+.verification-result {
+    margin-top: 2rem;
+    padding: 1rem;
+    border-radius: 4px;
+}
+
+.result-valid {
+    background-color: #dff0d8;
+    color: #3c763d;
+}
+
+.result-invalid {
+    background-color: #f2dede;
+    color: #a94442;
+}

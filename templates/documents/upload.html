@@ -1,13 +1,55 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/upload.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container" style="padding: 2rem;">
-    <h2>Upload Document to Sign</h2>
-    <div class="card" style="padding: 2rem; margin-top: 1rem;">
-        <form method="post" enctype="multipart/form-data">
+<div class="container upload-container">
+    <div class="card upload-card">
+        <div class="upload-header">
+            <h2><i class="fas fa-cloud-upload-alt"></i> Upload Document</h2>
+            <p>Upload your document to sign securely. We support PDF, DOCX, and PNG.</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="upload-form">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary" style="background-color: #008CBA; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Upload Document</button>
+            
+            <div class="form-group">
+                <label for="{{ form.title.id_for_label }}">Document Title</label>
+                {{ form.title }}
+                {% if form.title.errors %}
+                <div class="error-message">{{ form.title.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <i class="fas fa-file-upload"></i>
+                </div>
+                <h3>Drag & Drop your file here</h3>
+                <p>or <span>Browse Files</span></p>
+                <input type="file" name="file" id="id_file" required class="file-input-hidden">
+                <div class="file-name" id="fileName">No file selected</div>
+            </div>
+            {% if form.file.errors %}
+            <div class="error-message">{{ form.file.errors }}</div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary btn-upload">
+                <i class="fas fa-arrow-right"></i> Upload Document
+            </button>
         </form>
     </div>
 </div>
+
+<script>
+    // Simple script to handle file input change visualization
+    document.getElementById('id_file').addEventListener('change', function(e) {
+        var fileName = e.target.files[0] ? e.target.files[0].name : "No file selected";
+        document.getElementById('fileName').textContent = fileName;
+        document.getElementById('uploadArea').classList.add('has-file');
+    });
+</script>
 {% endblock %}

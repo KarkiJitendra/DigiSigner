@@ -1,13 +1,46 @@
 {% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+<link rel="stylesheet" href="{% static 'css/signature_upload.css' %}">
+{% endblock %}
+
 {% block content %}
-<div class="container" style="padding: 2rem;">
-    <h2>Upload Your Signature</h2>
-    <div class="card" style="padding: 2rem; margin-top: 1rem;">
-        <form method="post" enctype="multipart/form-data">
+<div class="container upload-container">
+    <div class="card upload-card">
+        <div class="upload-header">
+            <h2><i class="fas fa-signature"></i> Upload Your Signature</h2>
+            <p>Upload a clear image of your signature. We recommend a PNG with transparent background.</p>
+        </div>
+        
+        <form method="post" enctype="multipart/form-data" class="upload-form">
             {% csrf_token %}
-            {{ form.as_p }}
-            <button type="submit" class="btn btn-primary" style="background-color: #4CAF50; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer;">Upload Signature</button>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <i class="fas fa-file-image"></i>
+                </div>
+                <h3>Drag & Drop your signature here</h3>
+                <p>or <span>Browse Files</span></p>
+                <input type="file" name="image" id="id_image" required class="file-input-hidden" accept="image/*">
+                <div class="file-name" id="fileName">No file selected</div>
+            </div>
+            {% if form.image.errors %}
+            <div class="error-message">{{ form.image.errors }}</div>
+            {% endif %}
+
+            <button type="submit" class="btn btn-primary btn-upload">
+                <i class="fas fa-check"></i> Upload Signature
+            </button>
         </form>
     </div>
 </div>
+
+<script>
+    document.getElementById('id_image').addEventListener('change', function(e) {
+        var fileName = e.target.files[0] ? e.target.files[0].name : "No file selected";
+        document.getElementById('fileName').textContent = fileName;
+        document.getElementById('uploadArea').classList.add('has-file');
+    });
+</script>
 {% endblock %}
