@@ -4,13 +4,16 @@ from django.contrib.auth.decorators import login_required
 from django.contrib import messages
 from django.contrib.auth.forms import AuthenticationForm
 from django.core.files import File
+from django.core.files.base import ContentFile
 from django.conf import settings
 import os
+import shutil
 from .forms import *
 from .models import *
 from .models import *
 from .utils import sign_pdf, calculate_hash, generate_key_pair, encrypt_private_key, decrypt_private_key, sign_hash, verify_signature
-
+from django.core.paginator import Paginator
+from django.utils import timezone
 
 
 def register(request):
@@ -74,7 +77,7 @@ def dashboard(request):
         has_keys = hasattr(request.user, 'key_pair')
     except:
         has_keys = False
-    return render(request, 'users/dashboard.html', {'documents': documents, 'has_keys': has_keys})
+    return render(request, 'users/home.html', {'documents': documents, 'has_keys': has_keys})
 
 @login_required
 def upload_signature(request):
@@ -144,7 +147,14 @@ def sign_document(request, document_id):
         os.makedirs(os.path.dirname(output_path), exist_ok=True)
         
         try:
-            sign_pdf(document.file.path, signature.image.path, output_path)
+            # Check if user wants visual signature
+            add_visual_sign = request.POST.get('visual_sign') == 'on'
+            
+            if add_visual_sign:
+                sign_pdf(document.file.path, signature.image.path, output_path)
+            else:
+                # Just copy the original file if no visual sign needed
+                shutil.copy2(document.file.path, output_path)
             
             with open(output_path, 'rb') as f:
                 document.signed_file.save(output_filename, File(f), save=True)
@@ -213,3 +223,93 @@ def verify_document(request):
             }
             
     return render(request, 'documents/verify.html', {'result': verification_result})
+
+
+    # views.py
+
+
+@login_required
+def api_tokens_view(request):
+    tokens = ApiToken.objects.select_related('user').all().order_by('-created_at')
+
+    active_count = tokens.filter(expires_at__gt=timezone.now()).count()
+    expiring_count = tokens.filter(
+        expires_at__gt=timezone.now(),
+        expires_at__lte=timezone.now() + timezone.timedelta(days=30)
+    ).count()
+    expired_count = tokens.filter(expires_at__lte=timezone.now()).count()
+    
+    # Pagination
+    paginator = Paginator(tokens, 25)
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+    
+    context = {
+        'tokens': page_obj,
+        'active_count': active_count,
+        'expiring_count': expiring_count,
+        'expired_count': expired_count,
+        'total_count': tokens.count(),
+        'page_size': 25,
+    }
+    
+    return render(request, 'api/apitoken.html', context)
+
+
+
+
+
+@login_required
+def add_api_token_view(request):
+    if request.method == 'POST':
+        form = APITokenCreationForm(request.POST)
+        if form.is_valid():
+            token = form.save(commit=False)
+            token.created_by = request.user
+            
+            # Generate secure token
+            import secrets
+            token.token = secrets.token_urlsafe(32)
+            
+            # Set expiry based on form data
+            expiry_option = request.POST.get('expiry_option')
+            if expiry_option and expiry_option != 'never':
+                import datetime
+                if expiry_option == 'custom':
+                    # Parse custom date and time
+                    date_str = request.POST.get('custom_date')
+                    time_str = request.POST.get('custom_time')
+                    if date_str and time_str:
+                        expiry_datetime = datetime.datetime.strptime(
+                            f"{date_str} {time_str}", "%Y-%m-%d %H:%M"
+                        )
+                        token.expires_at = expiry_datetime
+                else:
+                    # Add days to current date
+                    days = int(expiry_option)
+                    token.expires_at = datetime.datetime.now() + datetime.timedelta(days=days)
+            
+            token.save()
+            
+            # Save permissions
+            permissions = request.POST.getlist('permissions')
+            for perm in permissions:
+                # Add permission logic here
+                pass
+            
+            # Show success message with token
+            messages.success(request, f'API token generated successfully: {token.token}')
+            
+            # Store token in session for one-time display
+            request.session['generated_token'] = token.token
+            request.session['token_description'] = token.description
+            
+            return redirect('api_tokens_view')
+    else:
+        form = APITokenForm()
+    
+    context = {
+        'form': form,
+    }
+    return render(request, 'api/apikey_generate.html', context)
+

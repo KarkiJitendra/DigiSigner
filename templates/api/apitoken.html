@@ -1,0 +1,445 @@
+<!-- templates/admin/api_tokens.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/api_token.css' %}">
+{% endblock %}
+
+{% block extrahead %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/clipboard@2.0.11/dist/clipboard.min.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="api-tokens-container">
+    <!-- Header Section -->
+    <div class="tokens-header">
+        <div class="header-left">
+            <h1>
+                <i class="fas fa-key"></i>
+                API Tokens Management
+                <span class="badge-count">{{ tokens|length }}</span>
+            </h1>
+            <p class="subtitle">Manage and monitor all API access tokens across your organization</p>
+        </div>
+        <div class="header-right">
+            <button class="btn btn-primary" id="addTokenBtn">
+                <i class="fas fa-plus-circle"></i> Generate New Token
+            </button>
+            <button class="btn btn-outline" id="exportTokensBtn">
+                <i class="fas fa-download"></i> Export
+            </button>
+            <div class="view-toggle">
+                <button class="view-btn active" data-view="table">
+                    <i class="fas fa-table"></i>
+                </button>
+                <button class="view-btn" data-view="grid">
+                    <i class="fas fa-th-large"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Stats Overview -->
+    <div class="stats-overview">
+        <div class="stat-card">
+            <div class="stat-icon active">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ active_count }} Active</h3>
+                <p>Currently valid tokens</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon expiring">
+                <i class="fas fa-clock"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ expiring_count }} Expiring Soon</h3>
+                <p>Within next 30 days</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon expired">
+                <i class="fas fa-times-circle"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ expired_count }} Expired</h3>
+                <p>Require renewal</p>
+            </div>
+        </div>
+        <div class="stat-card">
+            <div class="stat-icon total">
+                <i class="fas fa-key"></i>
+            </div>
+            <div class="stat-content">
+                <h3>{{ total_count }} Total</h3>
+                <p>All API tokens</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Action Bar -->
+    <div class="action-bar">
+        <div class="action-left">
+            <div class="bulk-actions">
+                <select id="bulkAction" class="form-select">
+                    <option value="">Bulk Actions</option>
+                    <option value="revoke">Revoke Selected</option>
+                    <option value="renew">Renew Selected</option>
+                    <option value="export">Export Selected</option>
+                    <option value="delete">Delete Selected</option>
+                </select>
+                <button class="btn btn-secondary" id="applyBulkAction">Apply</button>
+            </div>
+            <div class="search-box">
+                <input type="text" id="tokenSearch" placeholder="Search tokens, users, descriptions...">
+                <button class="search-btn"><i class="fas fa-search"></i></button>
+            </div>
+        </div>
+        <div class="action-right">
+            <div class="filter-dropdown">
+                <button class="filter-toggle">
+                    <i class="fas fa-filter"></i> Filters
+                    <span class="filter-count">3</span>
+                </button>
+                <div class="filter-dropdown-content">
+                    <div class="filter-group">
+                        <label>Expiry Status</label>
+                        <div class="filter-options">
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="status" value="active" checked>
+                                <span class="checkmark"></span>
+                                Active
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="status" value="expiring">
+                                <span class="checkmark"></span>
+                                Expiring Soon
+                            </label>
+                            <label class="checkbox-label">
+                                <input type="checkbox" name="status" value="expired">
+                                <span class="checkmark"></span>
+                                Expired
+                            </label>
+                        </div>
+                    </div>
+                    <div class="filter-group">
+                        <label>Organization</label>
+                        <select class="form-select">
+                            <option value="">All Organizations</option>
+                            <option value="nepal-insurance">Nepal Insurance Authority</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="filter-group">
+                        <label>Created Date</label>
+                        <input type="date" class="form-control" id="createdDate">
+                    </div>
+                    <div class="filter-actions">
+                        <button class="btn btn-sm btn-primary" id="applyFilters">Apply</button>
+                        <button class="btn btn-sm btn-outline" id="resetFilters">Reset</button>
+                    </div>
+                </div>
+            </div>
+            <button class="btn btn-icon" id="refreshBtn" title="Refresh">
+                <i class="fas fa-sync-alt"></i>
+            </button>
+        </div>
+    </div>
+
+    <!-- Tokens Table -->
+    <div class="tokens-table-container" id="tableView">
+        <table class="tokens-table">
+            <thead>
+                <tr>
+                    <th class="select-column">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="selectAll">
+                            <span class="checkmark"></span>
+                        </label>
+                    </th>
+                    <th class="token-column">
+                        <div class="sortable-header" data-sort="token">
+                            TOKEN <i class="fas fa-sort"></i>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="sortable-header" data-sort="expires_at">
+                            EXPIRES AT <i class="fas fa-sort"></i>
+                        </div>
+                    </th>
+                    <th>
+                        <div class="sortable-header" data-sort="expiry_status">
+                            EXPIRY STATUS <i class="fas fa-sort"></i>
+                        </div>
+                    </th>
+                    <th>DESCRIPTION</th>
+                    <th>
+                        <div class="sortable-header" data-sort="user">
+                            USER <i class="fas fa-sort"></i>
+                        </div>
+                    </th>
+                    <th>ORGANIZATION</th>
+                    <th>
+                        <div class="sortable-header" data-sort="created_at">
+                            CREATED AT <i class="fas fa-sort"></i>
+                        </div>
+                    </th>
+                    <th class="actions-column">ACTIONS</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for token in tokens %}
+                <tr class="token-row {% if token.expired %}expired{% elif token.expiring_soon %}expiring{% endif %}" data-token-id="{{ token.id }}">
+                    <td class="select-column">
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="token-select" value="{{ token.id }}">
+                            <span class="checkmark"></span>
+                        </label>
+                    </td>
+                    <td class="token-column">
+                        <div class="token-display">
+                            <code class="token-value">{{ token.token|slice:":8" }}...{{ token.token|slice:"-8:" }}</code>
+                            <button class="btn-icon copy-btn" data-clipboard-text="{{ token.token }}" title="Copy token">
+                                <i class="far fa-copy"></i>
+                            </button>
+                            <button class="btn-icon view-btn" onclick="toggleTokenView(this)" title="Show/hide token">
+                                <i class="fas fa-eye"></i>
+                            </button>
+                        </div>
+                        <div class="full-token" style="display: none;">
+                            <code>{{ token.token }}</code>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="expiry-cell">
+                            <i class="fas fa-calendar-alt"></i>
+                            {{ token.expires_at|date:"M. d, Y, g:i a" }}
+                            {% if token.expiring_soon %}
+                            <span class="expiry-badge warning">Soon</span>
+                            {% endif %}
+                        </div>
+                    </td>
+                    <td>
+                        {% if token.expired %}
+                        <span class="status-badge expired">
+                            <i class="fas fa-times-circle"></i> Expired
+                        </span>
+                        {% elif token.expiring_soon %}
+                        <span class="status-badge expiring">
+                            <i class="fas fa-clock"></i> Expiring Soon
+                        </span>
+                        {% else %}
+                        <span class="status-badge active">
+                            <i class="fas fa-check-circle"></i> Active
+                        </span>
+                        {% endif %}
+                    </td>
+                    <td class="description-cell">
+                        {% if token.description %}
+                        <div class="description-text">{{ token.description }}</div>
+                        {% else %}
+                        <span class="text-muted">No description</span>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <div class="user-cell">
+                            <div class="user-avatar">
+                                {{ token.user.first_name|first }}{{ token.user.last_name|first }}
+                            </div>
+                            <div class="user-info">
+                                <strong>{{ token.user.username }}</strong>
+                                <small>{{ token.user.email }}</small>
+                            </div>
+                        </div>
+                    </td>
+                    <td>
+                        <div class="org-cell">
+                            <i class="fas fa-building"></i>
+                            {{ token.organization }}
+                        </div>
+                    </td>
+                    <td>
+                        <div class="created-cell">
+                            <i class="far fa-clock"></i>
+                            {{ token.created_at|date:"M. d, Y, g:i a" }}
+                        </div>
+                    </td>
+                    <td class="actions-column">
+                        <div class="action-buttons">
+                            <button class="btn-icon action-btn renew-btn" title="Renew Token" onclick="renewToken('{{ token.id }}')">
+                                <i class="fas fa-redo"></i>
+                            </button>
+                            <button class="btn-icon action-btn revoke-btn" title="Revoke Token" onclick="revokeToken('{{ token.id }}')">
+                                <i class="fas fa-ban"></i>
+                            </button>
+                            <button class="btn-icon action-btn edit-btn" title="Edit Token" onclick="editToken('{{ token.id }}')">
+                                <i class="fas fa-edit"></i>
+                            </button>
+                            <button class="btn-icon action-btn delete-btn" title="Delete Token" onclick="deleteToken('{{ token.id }}')">
+                                <i class="fas fa-trash"></i>
+                            </button>
+                        </div>
+                    </td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="9" class="empty-state">
+                        <div class="empty-content">
+                            <i class="fas fa-key"></i>
+                            <h3>No API Tokens Found</h3>
+                            <p>Get started by generating your first API token</p>
+                            <form action="{% url 'generate_token_view' %}" method="POST">
+                                {% csrf_token %}
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus-circle"></i> Generate New Token
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Grid View (Hidden by default) -->
+    <div class="tokens-grid-container" id="gridView" style="display: none;">
+        <div class="tokens-grid">
+            {% for token in tokens %}
+            <div class="token-card {% if token.expired %}expired{% elif token.expiring_soon %}expiring{% endif %}" data-token-id="{{ token.id }}">
+                <div class="card-header">
+                    <div class="card-checkbox">
+                        <label class="checkbox-label">
+                            <input type="checkbox" class="token-select" value="{{ token.id }}">
+                            <span class="checkmark"></span>
+                        </label>
+                    </div>
+                    <div class="card-actions">
+                        <button class="btn-icon copy-btn" data-clipboard-text="{{ token.token }}">
+                            <i class="far fa-copy"></i>
+                        </button>
+                        <button class="btn-icon" onclick="toggleGridTokenView(this)">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="token-display-grid">
+                        <code>{{ token.token|slice:":8" }}...{{ token.token|slice:"-8:" }}</code>
+                    </div>
+                    <div class="token-full" style="display: none;">
+                        <code class="full-token">{{ token.token }}</code>
+                    </div>
+                    <div class="token-description">
+                        {% if token.description %}
+                        {{ token.description }}
+                        {% else %}
+                        <span class="text-muted">No description</span>
+                        {% endif %}
+                    </div>
+                    <div class="token-meta">
+                        <div class="meta-item">
+                            <i class="fas fa-user"></i>
+                            <span>{{ token.user.username }}</span>
+                        </div>
+                        <div class="meta-item">
+                            <i class="fas fa-building"></i>
+                            <span>{{ token.organization }}</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <div class="token-status">
+                        {% if token.expired %}
+                        <span class="status-badge expired">Expired</span>
+                        {% elif token.expiring_soon %}
+                        <span class="status-badge expiring">Expiring Soon</span>
+                        {% else %}
+                        <span class="status-badge active">Active</span>
+                        {% endif %}
+                    </div>
+                    <div class="token-expiry">
+                        <i class="fas fa-calendar-alt"></i>
+                        {{ token.expires_at|date:"M d, Y" }}
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="empty-grid-state">
+                <i class="fas fa-key"></i>
+                <h3>No API Tokens Found</h3>
+                <p>Get started by generating your first API token</p>
+                <form action="{% url 'generate_token_view' %}" method="POST">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-primary">
+                        <i class="fas fa-plus-circle"></i> Generate New Token
+                    </button>
+                </form>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+
+    <!-- Pagination -->
+    {% if tokens.has_other_pages %}
+    <div class="pagination-container">
+        <div class="pagination-info">
+            Showing {{ tokens.start_index }}-{{ tokens.end_index }} of {{ tokens.paginator.count }} tokens
+        </div>
+        <div class="pagination">
+            {% if tokens.has_previous %}
+            <a href="?page=1" class="page-link first">
+                <i class="fas fa-angle-double-left"></i>
+            </a>
+            <a href="?page={{ tokens.previous_page_number }}" class="page-link prev">
+                <i class="fas fa-angle-left"></i>
+            </a>
+            {% endif %}
+            
+            {% for num in tokens.paginator.page_range %}
+                {% if tokens.number == num %}
+                <span class="page-link active">{{ num }}</span>
+                {% elif num > tokens.number|add:'-3' and num < tokens.number|add:'3' %}
+                <a href="?page={{ num }}" class="page-link">{{ num }}</a>
+                {% endif %}
+            {% endfor %}
+            
+            {% if tokens.has_next %}
+            <a href="?page={{ tokens.next_page_number }}" class="page-link next">
+                <i class="fas fa-angle-right"></i>
+            </a>
+            <a href="?page={{ tokens.paginator.num_pages }}" class="page-link last">
+                <i class="fas fa-angle-double-right"></i>
+            </a>
+            {% endif %}
+        </div>
+        <div class="page-size">
+            <select id="pageSize" class="form-select">
+                <option value="10" {% if page_size == 10 %}selected{% endif %}>10 per page</option>
+                <option value="25" {% if page_size == 25 %}selected{% endif %}>25 per page</option>
+                <option value="50" {% if page_size == 50 %}selected{% endif %}>50 per page</option>
+                <option value="100" {% if page_size == 100 %}selected{% endif %}>100 per page</option>
+            </select>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Token Usage Stats -->
+    <div class="usage-stats">
+        <h3><i class="fas fa-chart-bar"></i> Token Usage Statistics (Last 30 Days)</h3>
+        <div class="stats-chart">
+            <canvas id="usageChart"></canvas>
+        </div>
+    </div>
+</div>
+
+<!-- Modals will be inserted here by JavaScript -->
+
+{% block extra_js %}
+<script src="{% static 'js/api_token.js' %}"></script>
+{% endblock %}
+{% endblock %}

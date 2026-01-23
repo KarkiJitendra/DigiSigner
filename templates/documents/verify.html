@@ -7,21 +7,49 @@
 
 {% block content %}
 <div class="container verify-container">
-    <h2>Verify Document</h2>
     <div class="card verify-card">
-        <p>Upload a signed document to verify its authenticity.</p>
+        <div class="verify-header">
+            <h2><i class="fas fa-shield-alt"></i> Verify Document</h2>
+            <p>Upload a digitally signed document to instantly verify its authenticity and integrity.</p>
+        </div>
+        
         <form method="post" enctype="multipart/form-data">
             {% csrf_token %}
-            <input type="file" name="file" required class="file-input">
-            <button type="submit" class="btn btn-info btn-verify">Verify Document</button>
-        </form>
-    </div>
+            
+            <div class="upload-area" id="uploadArea">
+                <div class="upload-icon">
+                    <i class="fas fa-search-plus"></i>
+                </div>
+                <h3>Drag & Drop document here</h3>
+                <p>or <span>Browse Files</span></p>
+                <input type="file" name="file" id="id_file" required class="file-input-hidden">
+                <div class="file-name" id="fileName">No file selected</div>
+            </div>
 
-    {% if result %}
-    <div class="verification-result {% if result.valid %}result-valid{% else %}result-invalid{% endif %}">
-        <h4>Verification Result</h4>
-        <p>{{ result.message }}</p>
+            <button type="submit" class="btn btn-info btn-verify">
+                <i class="fas fa-check-double"></i> Verify Now
+            </button>
+        </form>
+
+        {% if result %}
+        <div class="verification-result {% if result.valid %}result-valid{% else %}result-invalid{% endif %}">
+            <div class="result-icon">
+                <i class="fas {% if result.valid %}fa-check-circle{% else %}fa-times-circle{% endif %}"></i>
+            </div>
+            <div>
+                <h4>Verification Result: {% if result.valid %}Valid{% else %}Invalid{% endif %}</h4>
+                <p>{{ result.message }}</p>
+            </div>
+        </div>
+        {% endif %}
     </div>
-    {% endif %}
 </div>
+
+<script>
+    document.getElementById('id_file').addEventListener('change', function(e) {
+        var fileName = e.target.files[0] ? e.target.files[0].name : "No file selected";
+        document.getElementById('fileName').textContent = fileName;
+        document.getElementById('uploadArea').classList.add('has-file');
+    });
+</script>
 {% endblock %}

@@ -11,6 +11,8 @@ urlpatterns = [
     path('document/upload/', views.upload_document, name='upload_document'),
     path('document/<int:document_id>/sign/', views.sign_document, name='sign_document'),
     path('document/verify/', views.verify_document, name='verify_document'),
-    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
+    path('api_tokens/', views.api_tokens_view, name='api_token'),
+    path('api_tokens/generate/', views.add_api_token_view, name='generate_token_view'),
 
+    path('logout/', auth_views.LogoutView.as_view(next_page='login'), name='logout'),
 ]

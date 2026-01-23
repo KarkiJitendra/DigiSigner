@@ -7,14 +7,23 @@
 
 {% block content %}
 <div class="container keys-container">
-    <h2>Generate Cryptographic Keys</h2>
     <div class="card keys-card">
-        <p>To use advanced features like cryptographic signing, you need a Public/Private key pair.</p>
-        <p><strong>Note:</strong> Your private key will be encrypted and stored securely.</p>
+        <div class="keys-header">
+            <h2><i class="fas fa-key"></i> Generate Cryptographic Keys</h2>
+            <p>create a secure pair of cryptographic keys to digitally sign your documents.</p>
+        </div>
+
+        <div class="info-box">
+            <p><i class="fas fa-info-circle"></i> <strong>Important:</strong></p>
+            <p>You need a Public/Private key pair to use advanced signing features.</p>
+            <p>Your private key will be encrypted and stored securely on our servers.</p>
+        </div>
         
         <form method="post">
             {% csrf_token %}
-            <button type="submit" class="btn btn-warning btn-generate">Generate Keys</button>
+            <button type="submit" class="btn btn-warning btn-generate">
+                <i class="fas fa-cogs"></i> Generate New Keys
+            </button>
             <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-cancel">Cancel</a>
         </form>
     </div>

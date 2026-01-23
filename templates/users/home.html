@@ -1,0 +1,326 @@
+<!-- templates/admin_dashboard.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/home.css' %}">
+{% endblock %}
+
+{% block extrahead %}
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-container">
+    <!-- Header Section -->
+    <div class="dashboard-header">
+        <div class="header-left">
+            <h1><i class="fas fa-shield-alt"></i> RCertVault Admin Dashboard</h1>
+            <p class="subtitle">Monitor and manage your API access and security</p>
+        </div>
+        <div class="header-right">
+            <div class="quick-stats">
+                <div class="stat-item">
+                    <span class="stat-label">Active Users</span>
+                    <span class="stat-value" id="activeUsers">142</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">API Calls Today</span>
+                    <span class="stat-value" id="apiCalls">2,847</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-label">Success Rate</span>
+                    <span class="stat-value" id="successRate">98.7%</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Dashboard Grid -->
+    <div class="dashboard-grid">
+        <!-- Left Column: Navigation Cards -->
+        <div class="dashboard-column">
+            <!-- API Access Logs Card -->
+
+
+            <!-- Accounts Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-users"></i> ACCOUNTS</h2>
+                </div>
+                <div class="card-content">
+                    <ul class="nav-list">
+                        <li>
+                            <a href="{% url 'api_token' %}" class="nav-item">
+                                <i class="fas fa-key"></i>
+                                <span>API Tokens</span>
+                                <button class="btn-icon add-btn" title="Add API Token"><i class="fas fa-plus"></i></button>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item">
+                                <i class="fas fa-user-shield"></i>
+                                <span>Key Holders</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item">
+                                <i class="fas fa-building"></i>
+                                <span>Organization Memberships</span>
+                                <button class="btn-icon add-btn" title="Add Membership"><i class="fas fa-plus"></i></button>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item">
+                                <i class="fas fa-user"></i>
+                                <span>Users</span>
+                            </a>
+                        </li>
+                        <li>
+                            <a href="#" class="nav-item">
+                                <i class="fas fa-lock"></i>
+                                <span>Vault</span>
+                            </a>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+
+            <!-- API Access Logs Card -->
+            <div class="dashboard-card filter-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-filter"></i> QUICK FILTERS</h2>
+                </div>
+                <div class="card-content">
+                    <div class="filter-section">
+                        <h3><i class="fas fa-search"></i> Start typing to filter...</h3>
+                        <div class="search-box">
+                            <input type="text" placeholder="Search logs, users, tokens..." id="globalSearch">
+                            <button class="search-btn"><i class="fas fa-search"></i></button>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3><i class="fas fa-code"></i> By Method</h3>
+                        <div class="filter-tags">
+                            <span class="filter-tag active">All</span>
+                            <span class="filter-tag">GET</span>
+                            <span class="filter-tag">POST</span>
+                            <span class="filter-tag">PUT</span>
+                            <span class="filter-tag">DELETE</span>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3><i class="fas fa-exchange-alt"></i> By Response Status</h3>
+                        <div class="filter-tags">
+                            <span class="filter-tag active">All</span>
+                            <span class="filter-tag status-2xx">2xx</span>
+                            <span class="filter-tag status-4xx">4xx</span>
+                            <span class="filter-tag status-5xx">5xx</span>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-section">
+                        <h3><i class="fas fa-calendar"></i> By Created At</h3>
+                        <div class="filter-tags">
+                            <span class="filter-tag">Any date</span>
+                            <span class="filter-tag active">Today</span>
+                            <span class="filter-tag">Past 7 days</span>
+                            <span class="filter-tag">This month</span>
+                            <span class="filter-tag">This year</span>
+                        </div>
+                    </div>
+                    
+                    <div class="filter-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" id="showCounts" checked>
+                            <span class="checkmark"></span>
+                            Show counts
+                        </label>
+                        <button class="btn btn-primary" id="applyFilters">
+                            <i class="fas fa-play"></i> Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+
+        <!-- Middle Column: Stats and Charts -->
+        <div class="dashboard-column">
+            <!-- API Analytics Card -->
+            <div class="dashboard-card stats-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-chart-line"></i> API ANALYTICS</h2>
+                    <div class="time-filter">
+                        <select id="timeRange">
+                            <option value="today">Today</option>
+                            <option value="week" selected>Past 7 Days</option>
+                            <option value="month">This Month</option>
+                            <option value="year">This Year</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="card-content">
+                    <div class="stats-grid">
+                        <div class="stat-box success">
+                            <i class="fas fa-check-circle"></i>
+                            <div class="stat-info">
+                                <h3>Success</h3>
+                                <p class="stat-number">2,810</p>
+                                <p class="stat-percent">98.7%</p>
+                            </div>
+                        </div>
+                        <div class="stat-box warning">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <div class="stat-info">
+                                <h3>Warnings</h3>
+                                <p class="stat-number">24</p>
+                                <p class="stat-percent">0.8%</p>
+                            </div>
+                        </div>
+                        <div class="stat-box error">
+                            <i class="fas fa-times-circle"></i>
+                            <div class="stat-info">
+                                <h3>Errors</h3>
+                                <p class="stat-number">13</p>
+                                <p class="stat-percent">0.5%</p>
+                            </div>
+                        </div>
+                        <div class="stat-box total">
+                            <i class="fas fa-chart-bar"></i>
+                            <div class="stat-info">
+                                <h3>Total Calls</h3>
+                                <p class="stat-number">2,847</p>
+                                <p class="stat-change">+12%</p>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="chart-container">
+                        <canvas id="apiChart"></canvas>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Filter Card -->
+
+        <!-- Right Column: Recent Activity & Auth -->
+        <div class="dashboard-column">
+            <!-- Recent Activity Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-history"></i> RECENT ACTIVITY</h2>
+                </div>
+                <div class="card-content">
+                    <div class="activity-list">
+                        <div class="activity-item">
+                            <div class="activity-icon success">
+                                <i class="fas fa-check"></i>
+                            </div>
+                            <div class="activity-details">
+                                <p>API Key "Prod_Server" was used successfully</p>
+                                <small>2 minutes ago • Status: 200</small>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon warning">
+                                <i class="fas fa-exclamation"></i>
+                            </div>
+                            <div class="activity-details">
+                                <p>Failed login attempt from unknown IP</p>
+                                <small>15 minutes ago • Status: 401</small>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-user-plus"></i>
+                            </div>
+                            <div class="activity-details">
+                                <p>New user "john.doe" registered</p>
+                                <small>1 hour ago • By: admin</small>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-key"></i>
+                            </div>
+                            <div class="activity-details">
+                                <p>API token renewed for "Mobile_App"</p>
+                                <small>3 hours ago • Expires in 30 days</small>
+                            </div>
+                        </div>
+                        <div class="activity-item">
+                            <div class="activity-icon error">
+                                <i class="fas fa-times"></i>
+                            </div>
+                            <div class="activity-details">
+                                <p>Rate limit exceeded for IP: 192.168.1.100</p>
+                                <small>5 hours ago • Status: 429</small>
+                            </div>
+                        </div>
+                    </div>
+                    <a href="#" class="view-all-link">
+                        View all activity <i class="fas fa-arrow-right"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Authentication Card -->
+            <div class="dashboard-card">
+                <div class="card-header">
+                    <h2><i class="fas fa-user-lock"></i> AUTHENTICATION & AUTHORIZATION</h2>
+                </div>
+                <div class="card-content">
+                    <div class="auth-section">
+                        <h3><i class="fas fa-users"></i> Groups</h3>
+                        <p>Manage user groups and permissions</p>
+                        <div class="card-actions">
+                            <a href="#" class="btn btn-outline">
+                                <i class="fas fa-eye"></i> View Groups
+                            </a>
+                            <button class="btn-icon add-btn" title="Add Group">
+                                <i class="fas fa-plus"></i> Add
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bottom Section: System Status -->
+    <div class="system-status">
+        <div class="status-header">
+            <h3><i class="fas fa-heartbeat"></i> SYSTEM STATUS</h3>
+            <span class="status-indicator active">
+                <i class="fas fa-circle"></i> All Systems Operational
+            </span>
+        </div>
+        <div class="status-grid">
+            <div class="status-item online">
+                <i class="fas fa-server"></i>
+                <span>API Server</span>
+            </div>
+            <div class="status-item online">
+                <i class="fas fa-database"></i>
+                <span>Database</span>
+            </div>
+            <div class="status-item online">
+                <i class="fas fa-lock"></i>
+                <span>Authentication</span>
+            </div>
+            <div class="status-item online">
+                <i class="fas fa-chart-bar"></i>
+                <span>Analytics</span>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="{% static 'js/home.js' %}"></script>
+{% endblock %}
+{% endblock %}

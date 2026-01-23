@@ -7,14 +7,39 @@
 
 {% block content %}
 <div class="container sign-container">
-    <h2>Sign Document: {{ document.title }}</h2>
     <div class="card sign-card">
-        <p>Are you sure you want to sign this document with your saved signature?</p>
-        <p><strong>File:</strong> {{ document.original_filename }}</p> <!-- Assuming accessing name via property or method if needed, but 'file' is a field -->
+        <div class="sign-header">
+            <h2><i class="fas fa-file-signature"></i> Sign Document</h2>
+            <p>You are about to securely sign this document with your digital signature.</p>
+        </div>
         
+        <div class="file-info-box">
+            <div class="file-icon">
+                <i class="fas fa-file-pdf"></i>
+            </div>
+            <h3>{{ document.title }}</h3>
+            <p>Document ID: #{{ document.id }}</p>
+        </div>
+
+        <div class="signature-preview-hint">
+            <i class="fas fa-pen-nib"></i>
+            <span>Your default signature will be applied to the bottom of the last page.</span>
+        </div>
+
         <form method="post">
             {% csrf_token %}
-            <button type="submit" class="btn btn-success btn-sign">Sign Now</button>
+            
+            <div class="form-group checkbox-group" style="margin-bottom: 1.5rem; text-align: left; background: #f9f9f9; padding: 1rem; border-radius: 8px;">
+                <label for="visual_sign" style="display: flex; align-items: center; cursor: pointer; gap: 10px; margin: 0;">
+                    <input type="checkbox" name="visual_sign" id="visual_sign" checked style="width: 20px; height: 20px; accent-color: #4CAF50;">
+                    <span style="font-size: 1rem; color: #333;">Add visual signature stamp to document?</span>
+                </label>
+                <small style="display: block; margin-top: 5px; margin-left: 30px; color: #666;">Unchecking this will still cryptographically sign the file.</small>
+            </div>
+
+            <button type="submit" class="btn btn-success btn-sign">
+                <i class="fas fa-file-contract"></i> Confirm & Sign
+            </button>
             <a href="{% url 'dashboard' %}" class="btn btn-secondary btn-cancel">Cancel</a>
         </form>
     </div>

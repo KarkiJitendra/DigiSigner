@@ -1,0 +1,614 @@
+<!-- templates/admin/add_api_token.html -->
+{% extends "base.html" %}
+{% load static %}
+
+{% block extra_css %}
+    <link rel="stylesheet" href="{% static 'css/api_generate.css' %}">
+{% endblock %}
+
+{% block extrahead %}
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="add-api-token-container">
+    <!-- Header Section -->
+    <div class="token-header">
+        <div class="header-left">
+            <h1>
+                <i class="fas fa-key"></i>
+                Generate New API Token
+            </h1>
+            <p class="subtitle">Create a secure API token for accessing RCertVault services</p>
+        </div>
+        <div class="header-right">
+            <div class="token-preview">
+                <div class="token-preview-label">Token Preview</div>
+                <code class="token-preview-value">generated-on-save</code>
+                <button class="btn-icon copy-btn" id="previewCopyBtn" disabled>
+                    <i class="far fa-copy"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Progress Steps -->
+    <div class="progress-steps">
+        <div class="step active" data-step="1">
+            <div class="step-circle">1</div>
+            <div class="step-label">Token Details</div>
+        </div>
+        <div class="step" data-step="2">
+            <div class="step-circle">2</div>
+            <div class="step-label">Permissions</div>
+        </div>
+        <div class="step" data-step="3">
+            <div class="step-circle">3</div>
+            <div class="step-label">Review & Generate</div>
+        </div>
+    </div>
+
+    <!-- Main Form -->
+    <form id="apiTokenForm" method="post" novalidate>
+        {% csrf_token %}
+        
+        <!-- Step 1: Token Details -->
+        <div class="form-step active" id="step1">
+            <div class="form-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-info-circle"></i> Token Details</h2>
+                    <p class="section-subtitle">Configure basic information for your API token</p>
+                </div>
+                
+                <div class="form-grid">
+                    <!-- Organization -->
+                    <div class="form-group">
+                        <label for="id_organization">
+                            <i class="fas fa-building"></i> Organization
+                            <span class="optional-badge">Optional</span>
+                        </label>
+                        <div class="form-hint">
+                            Scope token to a specific organization for better access control
+                        </div>
+                        <select id="id_organization" name="organization" class="form-select">
+                            <option value="">-- Select Organization --</option>
+                            <option value="nepal-insurance" selected>Nepal Insurance Authority</option>
+                            <option value="org-1">Organization 1</option>
+                            <option value="org-2">Organization 2</option>
+                            <option value="org-3">Organization 3</option>
+                        </select>
+                        <div class="form-tip">
+                            <i class="fas fa-lightbulb"></i>
+                            Leaving this empty will create a global token accessible across all organizations
+                        </div>
+                    </div>
+
+                    <!-- Description -->
+                    <div class="form-group">
+                        <label for="id_description">
+                            <i class="fas fa-align-left"></i> Description
+                            <span class="required-badge">Required</span>
+                        </label>
+                        <div class="form-hint">
+                            Provide a meaningful description to identify this token's purpose
+                        </div>
+                        <textarea id="id_description" name="description" 
+                                  class="form-textarea" 
+                                  placeholder="e.g., Production server access for PDF signing"
+                                  rows="3" required></textarea>
+                        <div class="char-counter">
+                            <span id="charCount">0</span>/200 characters
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Expiry Settings -->
+                <div class="form-group expiry-group">
+                    <label>
+                        <i class="fas fa-calendar-times"></i> Token Expiry
+                        <span class="required-badge">Required</span>
+                    </label>
+                    <div class="form-hint">
+                        Set when this token should expire. For security, we recommend setting an expiry date.
+                    </div>
+                    
+                    <div class="expiry-options">
+                        <div class="option-card" data-expiry="7">
+                            <div class="option-header">
+                                <input type="radio" name="expiry_option" value="7" id="expiry_7" checked>
+                                <label for="expiry_7">Short-term (7 days)</label>
+                            </div>
+                            <p>For temporary access or testing purposes</p>
+                        </div>
+                        
+                        <div class="option-card" data-expiry="30">
+                            <div class="option-header">
+                                <input type="radio" name="expiry_option" value="30" id="expiry_30">
+                                <label for="expiry_30">Standard (30 days)</label>
+                            </div>
+                            <p>Recommended for most production use cases</p>
+                        </div>
+                        
+                        <div class="option-card" data-expiry="90">
+                            <div class="option-header">
+                                <input type="radio" name="expiry_option" value="90" id="expiry_90">
+                                <label for="expiry_90">Extended (90 days)</label>
+                            </div>
+                            <p>For long-running processes and integrations</p>
+                        </div>
+                        
+                        <div class="option-card" data-expiry="365">
+                            <div class="option-header">
+                                <input type="radio" name="expiry_option" value="365" id="expiry_365">
+                                <label for="expiry_365">Long-term (1 year)</label>
+                            </div>
+                            <p>For critical systems requiring stable access</p>
+                        </div>
+                        
+                        <div class="option-card custom-expiry" data-expiry="custom">
+                            <div class="option-header">
+                                <input type="radio" name="expiry_option" value="custom" id="expiry_custom">
+                                <label for="expiry_custom">Custom Date & Time</label>
+                            </div>
+                            <div class="custom-expiry-fields">
+                                <div class="date-time-grid">
+                                    <div class="date-field">
+                                        <label>Date</label>
+                                        <input type="text" id="custom_date" class="date-picker" 
+                                               placeholder="Select date" disabled>
+                                    </div>
+                                    <div class="time-field">
+                                        <label>Time</label>
+                                        <input type="text" id="custom_time" class="time-picker" 
+                                               placeholder="Select time" disabled>
+                                    </div>
+                                </div>
+                                <div class="quick-buttons">
+                                    <button type="button" class="btn-quick" data-date="today">
+                                        <i class="fas fa-calendar-day"></i> Today
+                                    </button>
+                                    <button type="button" class="btn-quick" data-date="tomorrow">
+                                        <i class="fas fa-calendar-plus"></i> Tomorrow
+                                    </button>
+                                    <button type="button" class="btn-quick" data-date="next-week">
+                                        <i class="fas fa-calendar-week"></i> Next Week
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="option-card" data-expiry="never">
+                            <div class="option-header">
+                                <input type="radio" name="expiry_option" value="never" id="expiry_never">
+                                <label for="expiry_never">Never Expire</label>
+                            </div>
+                            <p>
+                                <i class="fas fa-exclamation-triangle warning-icon"></i>
+                                Not recommended for security reasons
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <div class="expiry-preview">
+                        <i class="fas fa-clock"></i>
+                        Token will expire on: 
+                        <span id="expiryPreview" class="expiry-date">January 30, 2026, 12:56 PM</span>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-next" data-next="step2">
+                        Continue to Permissions <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 2: Permissions -->
+        <div class="form-step" id="step2">
+            <div class="form-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-user-shield"></i> API Access Permissions</h2>
+                    <p class="section-subtitle">Select what this token is allowed to do</p>
+                </div>
+
+                <!-- Permission Groups -->
+                <div class="permission-groups">
+                    <!-- PDF Operations -->
+                    <div class="permission-group">
+                        <div class="group-header">
+                            <div class="group-title">
+                                <i class="fas fa-file-pdf"></i>
+                                <h3>PDF Operations</h3>
+                            </div>
+                            <label class="checkbox-toggle">
+                                <input type="checkbox" id="togglePdfAll" class="toggle-all">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Select All</span>
+                            </label>
+                        </div>
+                        
+                        <div class="permission-cards">
+                            <div class="permission-card">
+                                <label class="checkbox-card">
+                                    <input type="checkbox" name="permissions" value="pdf_sign" id="perm_pdf_sign">
+                                    <div class="card-content">
+                                        <div class="card-icon">
+                                            <i class="fas fa-signature"></i>
+                                        </div>
+                                        <div class="card-details">
+                                            <h4>Allow PDF Signing</h4>
+                                            <p>Digitally sign PDF documents with certificates</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="permission-card">
+                                <label class="checkbox-card">
+                                    <input type="checkbox" name="permissions" value="pdf_verify" id="perm_pdf_verify">
+                                    <div class="card-content">
+                                        <div class="card-icon">
+                                            <i class="fas fa-check-circle"></i>
+                                        </div>
+                                        <div class="card-details">
+                                            <h4>Allow PDF Verification</h4>
+                                            <p>Verify digital signatures on PDF documents</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Form Operations -->
+                    <div class="permission-group">
+                        <div class="group-header">
+                            <div class="group-title">
+                                <i class="fas fa-file-alt"></i>
+                                <h3>Form Operations</h3>
+                            </div>
+                            <label class="checkbox-toggle">
+                                <input type="checkbox" id="toggleFormAll" class="toggle-all">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Select All</span>
+                            </label>
+                        </div>
+                        
+                        <div class="permission-cards">
+                            <div class="permission-card">
+                                <label class="checkbox-card">
+                                    <input type="checkbox" name="permissions" value="form_sign" id="perm_form_sign">
+                                    <div class="card-content">
+                                        <div class="card-icon">
+                                            <i class="fas fa-edit"></i>
+                                        </div>
+                                        <div class="card-details">
+                                            <h4>Allow Form Signing</h4>
+                                            <p>Digitally sign electronic forms and documents</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="permission-card">
+                                <label class="checkbox-card">
+                                    <input type="checkbox" name="permissions" value="form_verify" id="perm_form_verify">
+                                    <div class="card-content">
+                                        <div class="card-icon">
+                                            <i class="fas fa-search"></i>
+                                        </div>
+                                        <div class="card-details">
+                                            <h4>Allow Form Verification</h4>
+                                            <p>Verify signatures on electronic forms</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Advanced Permissions -->
+                    <div class="permission-group">
+                        <div class="group-header">
+                            <div class="group-title">
+                                <i class="fas fa-cogs"></i>
+                                <h3>Advanced Permissions</h3>
+                            </div>
+                            <label class="checkbox-toggle">
+                                <input type="checkbox" id="toggleAdvancedAll" class="toggle-all">
+                                <span class="toggle-slider"></span>
+                                <span class="toggle-label">Select All</span>
+                            </label>
+                        </div>
+                        
+                        <div class="permission-cards">
+                            <div class="permission-card">
+                                <label class="checkbox-card">
+                                    <input type="checkbox" name="permissions" value="read_all" id="perm_read_all">
+                                    <div class="card-content">
+                                        <div class="card-icon">
+                                            <i class="fas fa-eye"></i>
+                                        </div>
+                                        <div class="card-details">
+                                            <h4>Read Access</h4>
+                                            <p>View all certificates, keys, and audit logs</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="permission-card">
+                                <label class="checkbox-card">
+                                    <input type="checkbox" name="permissions" value="write_all" id="perm_write_all">
+                                    <div class="card-content">
+                                        <div class="card-icon">
+                                            <i class="fas fa-pencil-alt"></i>
+                                        </div>
+                                        <div class="card-details">
+                                            <h4>Write Access</h4>
+                                            <p>Create and update certificates and keys</p>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                            
+                            <div class="permission-card">
+                                <label class="checkbox-card">
+                                    <input type="checkbox" name="permissions" value="admin_all" id="perm_admin_all">
+                                    <div class="card-content">
+                                        <div class="card-icon">
+                                            <i class="fas fa-user-cog"></i>
+                                        </div>
+                                        <div class="card-details">
+                                            <h4>Admin Access</h4>
+                                            <p>Full system access including user management</p>
+                                            <span class="warning-note">
+                                                <i class="fas fa-exclamation-triangle"></i> Use with caution
+                                            </span>
+                                        </div>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="permissions-summary">
+                    <h4><i class="fas fa-clipboard-check"></i> Selected Permissions</h4>
+                    <div class="selected-permissions" id="selectedPermissions">
+                        <div class="empty-permissions">
+                            <i class="fas fa-info-circle"></i>
+                            No permissions selected yet. Select at least one permission above.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step-actions">
+                    <button type="button" class="btn btn-prev" data-prev="step1">
+                        <i class="fas fa-arrow-left"></i> Back to Details
+                    </button>
+                    <button type="button" class="btn btn-next" data-next="step3">
+                        Review & Generate <i class="fas fa-arrow-right"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Step 3: Review & Generate -->
+        <div class="form-step" id="step3">
+            <div class="form-section">
+                <div class="section-header">
+                    <h2><i class="fas fa-check-circle"></i> Review & Generate Token</h2>
+                    <p class="section-subtitle">Review your settings before creating the token</p>
+                </div>
+
+                <!-- Review Summary -->
+                <div class="review-summary">
+                    <div class="review-card">
+                        <div class="review-header">
+                            <i class="fas fa-info-circle"></i>
+                            <h3>Token Details</h3>
+                        </div>
+                        <div class="review-content">
+                            <div class="review-item">
+                                <span class="review-label">Description:</span>
+                                <span class="review-value" id="reviewDescription">Not set</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Organization:</span>
+                                <span class="review-value" id="reviewOrganization">Global (No organization)</span>
+                            </div>
+                            <div class="review-item">
+                                <span class="review-label">Expiry Date:</span>
+                                <span class="review-value" id="reviewExpiry">Not set</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="review-header">
+                            <i class="fas fa-user-shield"></i>
+                            <h3>Permissions</h3>
+                        </div>
+                        <div class="review-content">
+                            <div class="permissions-list" id="reviewPermissions">
+                                <div class="empty-review">No permissions selected</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="review-card">
+                        <div class="review-header">
+                            <i class="fas fa-shield-alt"></i>
+                            <h3>Security Information</h3>
+                        </div>
+                        <div class="review-content">
+                            <div class="security-tips">
+                                <div class="security-tip">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Token will be generated with 256-bit encryption</span>
+                                </div>
+                                <div class="security-tip">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Access logs will track all token usage</span>
+                                </div>
+                                <div class="security-tip">
+                                    <i class="fas fa-check-circle"></i>
+                                    <span>Token can be revoked at any time</span>
+                                </div>
+                                <div class="security-tip warning">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                    <span>Copy and store your token securely. You won't be able to see it again!</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Token Generation -->
+                <div class="token-generation">
+                    <h3><i class="fas fa-key"></i> Ready to Generate</h3>
+                    <div class="generation-options">
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="notify_team" id="notifyTeam" checked>
+                            <span class="checkmark"></span>
+                            Send notification to team members about this new token
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="auto_renew" id="autoRenew">
+                            <span class="checkmark"></span>
+                            Enable automatic renewal 7 days before expiry
+                        </label>
+                        <label class="checkbox-label">
+                            <input type="checkbox" name="rate_limit" id="rateLimit" checked>
+                            <span class="checkmark"></span>
+                            Apply standard rate limiting (1000 requests/hour)
+                        </label>
+                    </div>
+                </div>
+
+                <div class="step-actions final-actions">
+                    <button type="button" class="btn btn-prev" data-prev="step2">
+                        <i class="fas fa-arrow-left"></i> Back to Permissions
+                    </button>
+                    <div class="action-buttons">
+                        <button type="button" class="btn btn-secondary" id="saveDraftBtn">
+                            <i class="fas fa-save"></i> Save as Draft
+                        </button>
+                        <button type="submit" class="btn btn-primary" id="generateTokenBtn">
+                            <i class="fas fa-key"></i> Generate API Token
+                        </button>
+                        <button type="button" class="btn btn-success" id="generateCopyBtn">
+                            <i class="fas fa-copy"></i> Generate & Copy
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+
+    <!-- Quick Links -->
+    <div class="quick-links">
+        <h3><i class="fas fa-question-circle"></i> Need Help?</h3>
+        <div class="links-grid">
+            <a href="#" class="link-card">
+                <i class="fas fa-book"></i>
+                <span>API Documentation</span>
+            </a>
+            <a href="#" class="link-card">
+                <i class="fas fa-shield-alt"></i>
+                <span>Security Best Practices</span>
+            </a>
+            <a href="#" class="link-card">
+                <i class="fas fa-code"></i>
+                <span>Code Examples</span>
+            </a>
+            <a href="#" class="link-card">
+                <i class="fas fa-question"></i>
+                <span>Contact Support</span>
+            </a>
+        </div>
+    </div>
+</div>
+
+<!-- Generated Token Modal -->
+<div class="modal" id="tokenModal">
+    <div class="modal-content">
+        <div class="modal-header">
+            <h2><i class="fas fa-key"></i> API Token Generated Successfully!</h2>
+            <button class="modal-close">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="token-display-modal">
+                <div class="token-header-modal">
+                    <div class="token-label">Your New API Token:</div>
+                    <button class="btn-icon copy-token-btn" id="modalCopyBtn">
+                        <i class="far fa-copy"></i> Copy
+                    </button>
+                </div>
+                <code class="token-value-modal" id="generatedToken">8da8d5a9-7ea5-4f50-88d3-2eaf144457c1</code>
+                <div class="token-warning">
+                    <i class="fas fa-exclamation-triangle"></i>
+                    <strong>Important:</strong> Copy this token now. For security reasons, you won't be able to see it again!
+                </div>
+            </div>
+            
+            <div class="token-details-modal">
+                <h4><i class="fas fa-info-circle"></i> Token Details</h4>
+                <table class="token-info-table">
+                    <tr>
+                        <td>Description:</td>
+                        <td id="modalDescription">-</td>
+                    </tr>
+                    <tr>
+                        <td>Organization:</td>
+                        <td id="modalOrganization">-</td>
+                    </tr>
+                    <tr>
+                        <td>Expires:</td>
+                        <td id="modalExpiry">-</td>
+                    </tr>
+                    <tr>
+                        <td>Permissions:</td>
+                        <td id="modalPermissions">-</td>
+                    </tr>
+                </table>
+            </div>
+            
+            <div class="next-steps">
+                <h4><i class="fas fa-rocket"></i> Next Steps</h4>
+                <div class="steps-grid">
+                    <div class="step-card">
+                        <i class="fas fa-code"></i>
+                        <h5>Test Your Token</h5>
+                        <p>Try making an API call to verify everything works</p>
+                    </div>
+                    <div class="step-card">
+                        <i class="fas fa-book"></i>
+                        <h5>Read Documentation</h5>
+                        <p>Check our API docs for implementation guides</p>
+                    </div>
+                    <div class="step-card">
+                        <i class="fas fa-shield-alt"></i>
+                        <h5>Secure Storage</h5>
+                        <p>Store your token in a secure password manager</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" id="closeModalBtn">Close</button>
+            <button class="btn btn-primary" id="viewTokensBtn">
+                <i class="fas fa-list"></i> View All Tokens
+            </button>
+        </div>
+    </div>
+</div>
+
+{% block extra_js %}
+<script src="{% static 'js/apikey_generate.js' %}"></script>
+{% endblock %}
+{% endblock %}

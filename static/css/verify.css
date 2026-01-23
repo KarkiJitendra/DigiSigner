@@ -1,40 +1,175 @@
+/* Main Container */
 .verify-container {
-    padding: 2rem;
-    /* Ensure it behaves as a block element to avoid layout issues if base.css .container is flex */
-    display: block;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: calc(100vh - 140px);
+    padding: 3rem 1rem;
+    background-color: #f5f9ff;
 }
 
+/* Card Styling */
 .verify-card {
-    padding: 2rem;
-    margin-top: 1rem;
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.08);
+    padding: 3.5rem;
+    width: 100%;
+    max-width: 600px;
+    text-align: center;
+    transition: transform 0.3s ease;
 }
 
-.file-input {
+.verify-card:hover {
+    transform: translateY(-5px);
+}
+
+/* Header */
+.verify-header {
+    margin-bottom: 2.5rem;
+}
+
+.verify-header h2 {
+    color: #1e3c72;
+    font-size: 2rem;
+    margin-bottom: 0.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+}
+
+.verify-header h2 i {
+    color: #2196F3;
+}
+
+.verify-header p {
+    color: #666;
+    font-size: 1.1rem;
+}
+
+/* Upload Area (Drag & Drop Visual) */
+.upload-area {
+    border: 2px dashed #2196F3;
+    border-radius: 12px;
+    padding: 3rem 2rem;
+    background-color: #e3f2fd;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    margin-bottom: 2rem;
+}
+
+.upload-area:hover, .upload-area.has-file {
+    background-color: #bbdefb;
+    border-color: #1976D2;
+}
+
+.upload-icon {
+    font-size: 3rem;
+    color: #2196F3;
     margin-bottom: 1rem;
-    display: block;
 }
 
-.btn-verify {
-    background-color: #2196F3;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 4px;
+.upload-area h3 {
+    font-size: 1.25rem;
+    color: #333;
+    margin-bottom: 0.5rem;
+}
+
+.upload-area p {
+    color: #777;
+    margin-bottom: 0;
+}
+
+.upload-area span {
+    color: #1e3c72;
+    font-weight: 600;
+    text-decoration: underline;
+}
+
+/* Hide actual file input but keep it functional */
+.file-input-hidden {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    opacity: 0;
     cursor: pointer;
 }
 
+.file-name {
+    margin-top: 1rem;
+    font-weight: 600;
+    color: #1e3c72;
+    min-height: 1.5rem;
+}
+
+/* Buttons */
+.btn-verify {
+    width: 100%;
+    padding: 1.25rem;
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    background: linear-gradient(135deg, #2196F3 0%, #1976D2 100%);
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    box-shadow: 0 5px 15px rgba(33, 150, 243, 0.3);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    transition: all 0.3s;
+}
+
+.btn-verify:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 20px rgba(33, 150, 243, 0.4);
+}
+
+/* Verification Result */
 .verification-result {
     margin-top: 2rem;
-    padding: 1rem;
-    border-radius: 4px;
+    padding: 1.5rem;
+    border-radius: 8px;
+    text-align: left;
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.verification-result h4 {
+    margin-bottom: 0.5rem;
+    font-weight: 700;
+}
+
+.verification-result p {
+    margin: 0;
+    font-size: 1rem;
 }
 
 .result-valid {
     background-color: #dff0d8;
+    border: 1px solid #d6e9c6;
     color: #3c763d;
+}
+
+.result-valid .result-icon {
+    font-size: 1.5rem;
+    color: #4CAF50;
 }
 
 .result-invalid {
     background-color: #f2dede;
+    border: 1px solid #ebccd1;
     color: #a94442;
+}
+
+.result-invalid .result-icon {
+    font-size: 1.5rem;
+    color: #F44336;
 }
